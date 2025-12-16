@@ -2,8 +2,8 @@ pipeline {
     agent any
 
     tools {
-        maven 'maven-3.9'
-        jdk 'JDK17'
+        maven 'mymaven'
+        jdk 'myjdk'
     }
 
     stages {
@@ -28,14 +28,14 @@ pipeline {
                     echo Copying artifact to EC2...
                     scp -o StrictHostKeyChecking=no ^
                         target\\demo-1.0.0.jar ^
-                        ubuntu@34.224.84.252:/opt/app/
+                        ubuntu@54.237.154.55:/opt/app/
 
                     echo Stopping existing application...
-                    ssh -o StrictHostKeyChecking=no ubuntu@34.224.84.252 ^
+                    ssh -o StrictHostKeyChecking=no ubuntu@54.237.154.55 ^
                         "pkill -f demo-1.0.0.jar || true"
 
                     echo Starting application...
-                    ssh -o StrictHostKeyChecking=no ubuntu@34.224.84.252 ^
+                    ssh -o StrictHostKeyChecking=no ubuntu@54.237.154.55 ^
                         "nohup java -jar /opt/app/demo-1.0.0.jar > /opt/app/app.log 2>&1 &"
 
                     echo Deployment completed
