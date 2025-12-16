@@ -11,7 +11,7 @@ pipeline {
         stage('Checkout') {
             steps {
                 git branch: 'main',
-                    url: 'https://github.com/anaghamohanan/MavenApp-deployment-to-Ec2-with-JenkinsPipeline.git'
+                    url: 'https://github.com/ANAGHAMOHANAN/MavenApp-deployment-to-Ec2-with-JenkinsPipeline.git'
             }
         }
 
