@@ -17,7 +17,7 @@ pipeline {
 
         stage('Build') {
             steps {
-                sh 'mvn clean package'
+                bat 'mvn clean package'
             }
         }
 
@@ -29,21 +29,18 @@ pipeline {
                     usernameVariable: 'SSH_USER'
                 )]) {
 
-                    sh """
-                        echo "Copying artifact to EC2..."
+                    bat """
+                    echo Copying artifact to EC2...
 
-                        scp -o StrictHostKeyChecking=no -i "$SSH_KEY" \
-                        target/demo-1.0.0.jar \
-                        $SSH_USER@54.237.154.55:/opt/app/
+                    "C:\\Program Files\\Git\\usr\\bin\\scp.exe" -o StrictHostKeyChecking=no -i "%SSH_KEY%" ^
+                    target\\demo-1.0.0.jar ^
+                    %SSH_USER%@54.237.154.55:/opt/app/
 
-                        echo "Starting application on EC2..."
+                    echo Starting application...
 
-                        ssh -o StrictHostKeyChecking=no -i "$SSH_KEY" \
-                        $SSH_USER@54.237.154.55 << 'EOF'
-                            pkill -f demo-1.0.0.jar || true
-                            nohup java -jar /opt/app/demo-1.0.0.jar \
-                              > /opt/app/app.log 2>&1 &
-                        EOF
+                    "C:\\Program Files\\Git\\usr\\bin\\ssh.exe" -o StrictHostKeyChecking=no -i "%SSH_KEY%" ^
+                    %SSH_USER%@54.237.154.55 ^
+                    "pkill -f demo-1.0.0.jar || true && nohup java -jar /opt/app/demo-1.0.0.jar > /opt/app/app.log 2>&1 &"
                     """
                 }
             }
@@ -55,7 +52,7 @@ pipeline {
             echo "✅ Deployment completed successfully."
         }
         failure {
-            echo "❌ Deployment failed. Check Jenkins or EC2 logs."
+            echo "❌ Deployment failed."
         }
     }
 }
