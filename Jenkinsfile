@@ -25,8 +25,8 @@ pipeline {
             steps {
                 sshagent(['ec2-ssh-key']) {
                     sh """
-                    scp -o StrictHostKeyChecking=no target/demo-1.0.0.jar ec2-user@<EC2_PUBLIC_IP>:/opt/app/
-                    ssh -o StrictHostKeyChecking=no ec2-user@<EC2_PUBLIC_IP> '
+                    scp -o StrictHostKeyChecking=no target/demo-1.0.0.jar ubuntu@34.224.84.252:/opt/app/
+                    ssh -o StrictHostKeyChecking=no ubuntu@34.224.84.252 '
                         pkill -f demo-1.0.0.jar || true
                         nohup java -jar /opt/app/demo-1.0.0.jar > app.log 2>&1 &
                     '
