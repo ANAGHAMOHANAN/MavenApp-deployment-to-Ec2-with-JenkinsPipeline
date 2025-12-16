@@ -17,7 +17,8 @@ pipeline {
 
         stage('Build') {
             steps {
-                sh 'mvn clean package'
+                // *** MODIFIED: Added -X flag for verbose debugging to find the compilation error. ***
+                sh 'mvn clean package -X' 
             }
         }
 
@@ -25,6 +26,7 @@ pipeline {
             steps {
                 sshagent(['ec2-ssh-key']) {
                     sh """
+                    # Note: Replace <EC2_PUBLIC_IP> with your actual IP address before running.
                     scp -o StrictHostKeyChecking=no target/demo-1.0.0.jar ec2-user@<EC2_PUBLIC_IP>:/opt/app/
                     ssh -o StrictHostKeyChecking=no ec2-user@<EC2_PUBLIC_IP> '
                         pkill -f demo-1.0.0.jar || true
