@@ -17,29 +17,34 @@ pipeline {
 
         stage('Build') {
             steps {
-                bat 'mvn clean package'
+                sh 'mvn clean package'
             }
         }
 
-        stage('Deploy to Ubuntu EC2') {
+        stage('Deploy to EC2') {
             steps {
-                sshagent(['ec2-ssh-key']) {
-                    bat '''
-                    echo Copying artifact to EC2...
-                    scp -o StrictHostKeyChecking=no ^
-                        target\\demo-1.0.0.jar ^
-                        ubuntu@54.237.154.55:/opt/app/
+                withCredentials([sshUserPrivateKey(
+                    credentialsId: 'ec2-ssh-key',
+                    keyFileVariable: 'SSH_KEY',
+                    usernameVariable: 'SSH_USER'
+                )]) {
 
-                    echo Stopping existing application...
-                    ssh -o StrictHostKeyChecking=no ubuntu@54.237.154.55 ^
-                        "pkill -f demo-1.0.0.jar || true"
+                    sh """
+                        echo "Copying artifact to EC2..."
 
-                    echo Starting application...
-                    ssh -o StrictHostKeyChecking=no ubuntu@54.237.154.55 ^
-                        "nohup java -jar /opt/app/demo-1.0.0.jar > /opt/app/app.log 2>&1 &"
+                        scp -o StrictHostKeyChecking=no -i "$SSH_KEY" \
+                        target/demo-1.0.0.jar \
+                        $SSH_USER@54.237.154.55:/opt/app/
 
-                    echo Deployment completed
-                    '''
+                        echo "Starting application on EC2..."
+
+                        ssh -o StrictHostKeyChecking=no -i "$SSH_KEY" \
+                        $SSH_USER@54.237.154.55 << 'EOF'
+                            pkill -f demo-1.0.0.jar || true
+                            nohup java -jar /opt/app/demo-1.0.0.jar \
+                              > /opt/app/app.log 2>&1 &
+                        EOF
+                    """
                 }
             }
         }
@@ -50,7 +55,7 @@ pipeline {
             echo "✅ Deployment completed successfully."
         }
         failure {
-            echo "❌ Deployment failed. Check Jenkins and EC2 logs."
+            echo "❌ Deployment failed. Check Jenkins or EC2 logs."
         }
     }
 }
