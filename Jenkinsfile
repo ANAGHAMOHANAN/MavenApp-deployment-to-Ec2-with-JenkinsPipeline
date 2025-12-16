@@ -17,27 +17,28 @@ pipeline {
 
         stage('Build') {
             steps {
-                sh 'mvn clean package'
+                bat 'mvn clean package'
             }
         }
 
-        stage('Deploy to EC2') {
+        stage('Deploy to Ubuntu EC2') {
             steps {
                 sshagent(['ec2-ssh-key']) {
-                    sh '''
-                        echo "Copying artifact to EC2..."
-                        scp -o StrictHostKeyChecking=no \
-                            target/demo-1.0.0.jar \
-                            ubuntu@34.224.84.252:/opt/app/
+                    bat '''
+                    echo Copying artifact to EC2...
+                    scp -o StrictHostKeyChecking=no ^
+                        target\\demo-1.0.0.jar ^
+                        ubuntu@34.224.84.252:/opt/app/
 
-                        echo "Starting application on EC2..."
-                        ssh -o StrictHostKeyChecking=no ubuntu@54.237.154.55 << 'EOF'
-                            pkill -f demo-1.0.0.jar || true
-                            nohup java -jar /opt/app/demo-1.0.0.jar \
-                                > /opt/app/app.log 2>&1 &
-                        EOF
+                    echo Stopping existing application...
+                    ssh -o StrictHostKeyChecking=no ubuntu@34.224.84.252 ^
+                        "pkill -f demo-1.0.0.jar || true"
 
-                        echo "Deployment command executed successfully"
+                    echo Starting application...
+                    ssh -o StrictHostKeyChecking=no ubuntu@34.224.84.252 ^
+                        "nohup java -jar /opt/app/demo-1.0.0.jar > /opt/app/app.log 2>&1 &"
+
+                    echo Deployment completed
                     '''
                 }
             }
@@ -46,10 +47,10 @@ pipeline {
 
     post {
         success {
-            echo "Deployment completed successfully."
+            echo "✅ Deployment completed successfully."
         }
         failure {
-            echo "Deployment failed. Check Jenkins or EC2 logs."
+            echo "❌ Deployment failed. Check Jenkins and EC2 logs."
         }
     }
 }
