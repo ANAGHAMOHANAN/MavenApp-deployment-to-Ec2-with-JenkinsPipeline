@@ -11,7 +11,7 @@ pipeline {
         stage('Checkout') {
             steps {
                 git branch: 'main',
-                    url: 'https://github.com/bhuvan-raj/MavenApp-deployment-to-Ec2-with-JenkinsPipeline.git'
+                    url: 'https://github.com/anaghamohanan/MavenApp-deployment-to-Ec2-with-JenkinsPipeline.git'
             }
         }
 
@@ -31,7 +31,7 @@ pipeline {
                             ubuntu@34.224.84.252:/opt/app/
 
                         echo "Starting application on EC2..."
-                        ssh -o StrictHostKeyChecking=no ubuntu@34.224.84.252 << 'EOF'
+                        ssh -o StrictHostKeyChecking=no ubuntu@54.237.154.55 << 'EOF'
                             pkill -f demo-1.0.0.jar || true
                             nohup java -jar /opt/app/demo-1.0.0.jar \
                                 > /opt/app/app.log 2>&1 &
